@@ -1,7 +1,7 @@
 //board
-let tileSize = 32;
-let rows = 16;
-let columns = 16;
+let tileSize = 128;
+let rows = 6;
+let columns = 3;
 
 let board;
 let boardWidth = tileSize * columns; // 32 * 16
@@ -9,9 +9,9 @@ let boardHeight = tileSize * rows; // 32 * 16
 let context;
 
 //ship
-let shipWidth = tileSize * 2;
-let shipHeight = tileSize;
-let shipX = (tileSize * columns) / 2 - tileSize;
+let shipWidth = tileSize;
+let shipHeight = tileSize * 2;
+let shipX = tileSize;
 let shipY = tileSize * rows - tileSize * 2;
 
 let ship = {
@@ -28,6 +28,14 @@ let shipVelocityX = tileSize; //ship moving speed
 
 let score = 0;
 let gameOver = false;
+
+
+/**
+ * Problem 1: Rocks should be a 2D array
+ * 
+ * 
+ */
+
 
 window.onload = function () {
     board = document.getElementById("board");
@@ -46,10 +54,9 @@ window.onload = function () {
     rockImg.src = "./rock.png";
     createRocks();
 
-    requestAnimationFrame(update);
-    setInterval(createRocks, 6500); //every 1.5 seconds
+    requestAnimationFrame(update);  // each 10ms this update will be called once
+    setInterval(createRocks, 5000); // every 5 seconds
     document.addEventListener("keydown", moveShip);
-    document.addEventListener("keyup", shoot);
 };
 
 function update() {
@@ -82,6 +89,12 @@ function update() {
             //     rock.alive = false;
             //     createRocks();
             // }
+            
+            // check if touch the bottom
+            if (rock.y >= boardHeight) {
+                rock.alive = false;
+                score += 10;
+            }
         }
     }
 
@@ -123,7 +136,7 @@ function getRandomArbitrary(min, max) {
 
 // let rockRows = ;
 // let rockColumns = 3;
-let rockCount = 0; //number of rocks to defeat
+
 let rockVelocityY = 1; //rock moving speed
 
 function createRocks() {
@@ -133,18 +146,11 @@ function createRocks() {
     rockArray = []; // Clear the existing rocks
 
 
-    let rockWidth = Math.floor(boardWidth / 3);  //I figure if we use 3 cols this will scale better
-    let rockHeight = tileSize*3;
+    let rockWidth = tileSize;  //I figure if we use 3 cols this will scale better
+    let rockHeight = tileSize;
 
     // Randomly generate boolean array prepopulated with values tehen check if rocks are at a feasible position
-    let rocksInRow = [Math.random() < 0.5, Math.random() < 0.5, Math.random() < 0.5];
-
-    if (rocksInRow.every(position => position)) {
-        rocksInRow[Math.floor(Math.random() * rocksInRow.length)] = false;
-    }
-    if (rocksInRow.every(position => !position)) {
-        rocksInRow[Math.floor(Math.random() * rocksInRow.length)] = true;
-    }
+    let rocksInRow = rockGenerator()
 
     // Loop to create rocks
     for (let c = 0; c < rocksInRow.length; c++) {
@@ -166,7 +172,6 @@ function createRocks() {
         }
     }
 
-    rockCount = rockArray.length;
 }
 
 
@@ -177,4 +182,22 @@ function detectCollision(a, b) {
         a.y < b.y + b.height && //a's top left corner doesn't reach b's bottom left corner
         a.y + a.height > b.y    //a's bottom left corner passes b's top left corner
     ); 
+}
+
+
+
+/**
+ * This function will generate randomly a column of rocks
+ * @returns the boolean array indicate of rocks
+ */
+function rockGenerator() {
+    let rocksInRow = [Math.random() < 0.5, Math.random() < 0.5, Math.random() < 0.5];
+
+    if (rocksInRow.every(position => position)) {
+        rocksInRow[Math.floor(Math.random() * rocksInRow.length)] = false;
+    }
+    if (rocksInRow.every(position => !position)) {
+        rocksInRow[Math.floor(Math.random() * rocksInRow.length)] = true;
+    }
+    return rocksInRow;
 }
